@@ -1,0 +1,7 @@
+requests>=2.31.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+PyYAML>=6.0
+# Opcionales:
+# google-api-python-client>=2.100.0   # Para subir a Google Drive
+# google-auth>=2.23.0                  # Autenticación Google

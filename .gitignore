@@ -1,0 +1,15 @@
+# Credenciales y configuración local (usa config.example.yaml como plantilla)
+config.yaml
+service_account.json
+
+# Datos generados por el pipeline
+robot_history.json
+dashboard_robot_latest.html
+_tmp_tasks_*.xlsx
+robot_dashboard.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

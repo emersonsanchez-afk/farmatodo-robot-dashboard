@@ -1,0 +1,34 @@
+# ══════════════════════════════════════════════════════════════════
+#  Farmatodo Robot Dashboard — Configuración
+#  Renombrar este archivo a config.yaml y completar los valores
+# ══════════════════════════════════════════════════════════════════
+
+# ── Credenciales Gausium Cloud ────────────────────────────────────
+# Usar variables de entorno en producción (GAUSIUM_USERNAME, GAUSIUM_PASSWORD)
+# para no exponer contraseñas en texto plano.
+username: ""          # tu_email@farmatodo.com
+password: ""          # contraseña del portal cloud.gausium.com
+
+# ── Robot ─────────────────────────────────────────────────────────
+robot_serial: "GS438-6260-1CR-7000"
+
+# ── Archivos ──────────────────────────────────────────────────────
+template:     "dashboard_robot_v11.html"   # HTML base del dashboard
+output:       "dashboard_robot_latest.html" # Dashboard actualizado (resultado)
+history_file: "robot_history.json"         # Historial local de días procesados
+
+# ── Google Drive (opcional) ───────────────────────────────────────
+# ID de la carpeta de Drive donde subir el dashboard actualizado.
+# Requiere service_account.json con permisos de Drive.
+drive_folder: ""      # ej: "1ABC...xyz"
+
+# ── Notificación por email (opcional) ────────────────────────────
+notify_email: ""      # destinatario del resumen diario
+
+# Configuración SMTP (si notify_email está definido)
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  from: ""            # remitente
+  user: ""            # usuario SMTP
+  pass: ""            # contraseña SMTP o App Password de Gmail
