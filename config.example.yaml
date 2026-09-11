@@ -14,7 +14,7 @@ robot_serial: "GS438-6260-1CR-7000"
 
 # ── Archivos ──────────────────────────────────────────────────────
 template:     "dashboard_robot_v11.html"   # HTML base del dashboard
-output:       "dashboard_robot_latest.html" # Dashboard actualizado (resultado)
+output:       "index.html" # Dashboard actualizado (resultado; servido tal cual por Netlify/GitHub Pages)
 history_file: "robot_history.json"         # Historial local de días procesados
 
 # ── Google Drive (opcional) ───────────────────────────────────────

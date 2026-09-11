@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Robot Autónomo · Farmatodo</title>
+<style>
+  :root{
+    color-scheme: light;
+    --azul-farmatodo:#002858;
+    --azul-proceso:#0084D0;
+    --fondo-claro:#EBF3FB;
+    --blanco:#FFFFFF;
+    --surface:#fcfcfb;
+    --page:#f4f7fb;
+    --ink-primary:#0b0b0b;
+    --ink-secondary:#52514e;
+    --ink-muted:#898781;
+    --grid:#e1e0d9;
+    --border:rgba(11,11,11,0.10);
+    --good:#0ca30c;
+    --warning:#fab219;
+    --critical:#d03b3b;
+    --line:#0084D0;
+    --heading:#002858;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --surface:#1a1a19;
+      --page:#101317;
+      --ink-primary:#ffffff;
+      --ink-secondary:#c3c2b7;
+      --ink-muted:#898781;
+      --grid:#2c2c2a;
+      --border:rgba(255,255,255,0.10);
+      --good:#0ca30c;
+      --warning:#fab219;
+      --critical:#e66767;
+      --line:#3987e5;
+      --fondo-claro:#152238;
+      --heading:#ffffff;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --surface:#1a1a19;
+    --page:#101317;
+    --ink-primary:#ffffff;
+    --ink-secondary:#c3c2b7;
+    --ink-muted:#898781;
+    --grid:#2c2c2a;
+    --border:rgba(255,255,255,0.10);
+    --good:#0ca30c;
+    --warning:#fab219;
+    --critical:#e66767;
+    --line:#3987e5;
+    --fondo-claro:#152238;
+    --heading:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:0;
+    background:var(--page);
+    color:var(--ink-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 16px 40px}
+
+  /* ── Header ─────────────────────────────────────────────── */
+  header.top{
+    background:var(--azul-farmatodo);
+    color:#fff;
+    padding:22px 16px 26px;
+  }
+  header.top .inner{max-width:1180px;margin:0 auto}
+  header.top h1{
+    margin:0 0 4px;
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  header.top .sub{
+    color:var(--azul-proceso);
+    font-size:13px;
+    display:flex; flex-wrap:wrap; gap:6px 14px;
+    margin-top:6px;
+  }
+  header.top .sub span#updated-at{color:#fff}
+  #submeta-tasks{color:var(--azul-proceso)}
+
+  /* ── KPI row ────────────────────────────────────────────── */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-top:-18px;
+  }
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .kpi .lbl{font-size:11px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em}
+  .kpi .val{font-size:26px;font-weight:800;color:var(--heading);margin-top:4px;font-variant-numeric:tabular-nums}
+  .kpi .delta{font-size:11px;margin-top:4px;font-weight:600}
+  .kpi .delta.up{color:var(--good)}
+  .kpi .delta.down{color:var(--critical)}
+
+  /* ── Section cards ──────────────────────────────────────── */
+  section.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    margin-top:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  section.card h2{
+    margin:0 0 12px;
+    font-size:15px;
+    font-weight:700;
+    color:var(--heading);
+  }
+
+  /* ── Filters ────────────────────────────────────────────── */
+  .filters{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end}
+  .filters .grp{display:flex;flex-direction:column;gap:4px}
+  .filters label{font-size:11px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.04em}
+  .filters input[type="date"]{
+    padding:6px 8px;border:1px solid var(--grid);border-radius:6px;
+    background:var(--surface);color:var(--ink-primary);font-size:13px;
+  }
+  .filters button{
+    padding:7px 14px;border:none;border-radius:6px;
+    background:var(--azul-proceso);color:#fff;font-size:13px;font-weight:600;
+    cursor:pointer;
+  }
+  .filters button.ghost{background:transparent;color:var(--azul-proceso);border:1px solid var(--azul-proceso)}
+  .filters .note{font-size:11px;color:var(--ink-muted);align-self:center}
+
+  /* ── Charts ─────────────────────────────────────────────── */
+  .charts-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  @media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
+  svg.chart{width:100%;height:auto;overflow:visible;font-family:inherit}
+  .axis-label{fill:var(--ink-muted);font-size:10px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--ink-secondary)}
+  .legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .tooltip{
+    position:absolute;pointer-events:none;
+    background:var(--azul-farmatodo);color:#fff;
+    font-size:11px;padding:5px 8px;border-radius:5px;
+    transform:translate(-50%,-115%);white-space:nowrap;
+    opacity:0;transition:opacity .1s;z-index:5;
+  }
+  .chart-wrap{position:relative}
+
+  /* ── Monthly cards (.mes4) ──────────────────────────────── */
+  .mes4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:900px){.mes4{grid-template-columns:repeat(2,1fr)!important}}
+  .mes-card{
+    border:1px solid var(--border);border-radius:8px;padding:12px;
+    background:var(--fondo-claro);
+  }
+  .mes-card .mm{font-weight:700;font-size:13px;color:var(--heading)}
+  .mes-card .row{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-secondary);margin-top:4px}
+  .mes-card .row b{color:var(--ink-primary)}
+
+  /* ── Consumables ────────────────────────────────────────── */
+  .cons{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .cons .gauge{width:120px;height:120px;position:relative}
+  .cons .cp{font-size:26px;font-weight:800}
+  .cons .cp.c-r{color:var(--azul-proceso)}
+  .cons .status{font-size:12px;font-weight:700;margin-top:2px}
+  .cons .status.ok{color:var(--good)}
+  .cons .status.low{color:var(--warning)}
+  .cons .status.crit{color:var(--critical)}
+
+  /* ── Table ──────────────────────────────────────────────── */
+  table.daily{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.daily th{
+    text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--ink-muted);border-bottom:1px solid var(--grid);padding:7px 6px;
+    cursor:pointer;user-select:none;white-space:nowrap;
+  }
+  table.daily td{padding:6px;border-bottom:1px solid var(--grid);white-space:nowrap;font-variant-numeric:tabular-nums}
+  table.daily tbody tr:hover{background:var(--fondo-claro)}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-weight:700;font-size:11.5px}
+  .badge .dot{width:7px;height:7px;border-radius:50%}
+  .badge.normal{color:var(--good)} .badge.normal .dot{background:var(--good)}
+  .badge.low{color:var(--warning)} .badge.low .dot{background:var(--warning)}
+  .badge.critical{color:var(--critical)} .badge.critical .dot{background:var(--critical)}
+  .table-scroll{overflow-x:auto}
+  .empty-state{
+    text-align:center;color:var(--ink-muted);font-size:13px;padding:28px 8px;
+  }
+  footer.foot{text-align:center;color:var(--ink-muted);font-size:11px;margin-top:24px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <h1>🤖 Dashboard Robot Autónomo de Limpieza</h1>
+    <div class="sub">
+      <span id="updated-at">Actualizado: 06 Sep 2026</span>
+      <span id="submeta-tasks" data-tasks-info="Gausium Cloud · 0 tareas · Hasta 2026-09-06"></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="kpis" id="kpi-row">
+    <div class="kpi"><div class="lbl">Tareas totales</div><div class="val" id="kpi-tot">—</div><div class="delta" id="kpi-tot-d"></div></div>
+    <div class="kpi"><div class="lbl">% Completadas</div><div class="val" id="kpi-comp">—</div><div class="delta" id="kpi-comp-d"></div></div>
+    <div class="kpi"><div class="lbl">Eficiencia m²</div><div class="val" id="kpi-eff">—</div><div class="delta" id="kpi-eff-d"></div></div>
+    <div class="kpi"><div class="lbl">Horas operación</div><div class="val" id="kpi-dur">—</div><div class="delta" id="kpi-dur-d"></div></div>
+    <div class="kpi"><div class="lbl">Squeegee actual</div><div class="val" id="kpi-sq">—</div><div class="delta" id="kpi-sq-d"></div></div>
+  </div>
+
+  <section class="card">
+    <h2>Filtros</h2>
+    <div class="filters">
+      <div class="grp">
+        <label for="fa-from">Rango — desde</label>
+        <input type="date" id="fa-from" min="2026-03-11" max="2026-09-06" value="">
+      </div>
+      <div class="grp">
+        <label for="fa-to">Rango — hasta</label>
+        <input type="date" id="fa-to" min="2026-03-11" max="2026-09-06" value="2026-09-06">
+      </div>
+      <button id="btn-apply">Aplicar</button>
+      <button class="ghost" id="btn-reset">Ver todo</button>
+      <span class="note">|</span>
+      <div class="grp">
+        <label for="cb-from">Comparar — desde</label>
+        <input type="date" id="cb-from" min="2026-03-11" max="2026-09-06" value="">
+      </div>
+      <div class="grp">
+        <label for="cb-to">Comparar — hasta</label>
+        <input type="date" id="cb-to" min="2026-03-11" max="2026-09-06" value="2026-09-06">
+      </div>
+      <button class="ghost" id="btn-compare">Comparar</button>
+      <span class="note" id="filter-note"></span>
+    </div>
+  </section>
+
+  <div class="charts-grid">
+    <section class="card">
+      <h2>Distribución horaria de tareas <span style="font-weight:400;color:var(--ink-muted);font-size:11px">· último período procesado</span></h2>
+      <div class="chart-wrap" id="hourly-wrap">
+        <svg class="chart" id="chart-hourly" viewBox="0 0 640 260" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="tt-hourly"></div>
+      </div>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--good)"></span>Normal end</span>
+        <span><span class="sw" style="background:var(--warning)"></span>Task replaced</span>
+        <span><span class="sw" style="background:var(--critical)"></span>Manual termination</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Tendencia Squeegee (%)</h2>
+      <div class="chart-wrap" id="sq-wrap">
+        <svg class="chart" id="chart-sq" viewBox="0 0 480 260" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="tooltip" id="tt-sq"></div>
+      </div>
+      <div class="legend"><span><span class="sw" style="background:var(--line)"></span>% Squeegee restante</span></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Resumen mensual</h2>
+    <div class="mes4" id="mes-grid"></div>
+  </section>
+
+  <section class="card">
+    <h2 id="cons-title">Estado de consumibles · Corte 06 Sep 2026</h2>
+    <div class="cons">
+      <div>
+        <div class="cp c-r">100.0%</div>
+        <div class="status ok" id="cons-status">✔ Normal</div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <div style="height:10px;border-radius:5px;background:var(--grid);overflow:hidden">
+          <div id="cons-bar" style="height:100%;width:100%;background:var(--good)"></div>
+        </div>
+        <div style="font-size:11px;color:var(--ink-muted);margin-top:4px">Squeegee — vida útil restante del cauchillo de secado</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Detalle diario</h2>
+    <div class="table-scroll">
+      <table class="daily" id="daily-table">
+        <thead>
+          <tr>
+            <th data-k="fd">Fecha</th>
+            <th data-k="wd">Día</th>
+            <th data-k="store">Tienda</th>
+            <th data-k="tot">Tareas</th>
+            <th data-k="comp">Completadas</th>
+            <th data-k="repl">Reemplazadas</th>
+            <th data-k="man">Manual</th>
+            <th data-k="m2r">m² real</th>
+            <th data-k="m2p">m² plan</th>
+            <th data-k="eff">Eficiencia</th>
+            <th data-k="dur">Horas</th>
+            <th data-k="sq">Squeegee</th>
+          </tr>
+        </thead>
+        <tbody id="daily-tbody"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state">
+        Sin datos aún — ejecuta <code>python run_daily.py</code> para sincronizar con Gausium Cloud.
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">Farmatodo Colombia S.A. · Dirección de Operaciones · Proyecto ADT 2.0 · Datos: Gausium Cloud</footer>
+</div>
+
+<script>
+const DATA=[];
+const MONTHLY=[];
+const HOURLY={"comp":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"repl":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"man":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]};
+const SQ_TREND={"labels":[],"values":[]};
+const MES_LABEL={};
+
+(function(){
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const fmtPct = (n) => `${(Math.round(n*10)/10).toFixed(1)}%`;
+
+  // ── Mirror the tasks/date meta from its data attribute (kept out of
+  //    plain text so the dashboard_updater.py regex never runs unbounded) ──
+  const metaEl = $('submeta-tasks');
+  if (metaEl) metaEl.textContent = metaEl.dataset.tasksInfo || '';
+
+  function inRange(fd, from, to){
+    if (from && fd < from) return false;
+    if (to && fd > to) return false;
+    return true;
+  }
+
+  function computeKpis(rows){
+    if (!rows.length) return null;
+    const tot  = rows.reduce((a,r)=>a+r.tot,0);
+    const comp = rows.reduce((a,r)=>a+r.comp,0);
+    const m2r  = rows.reduce((a,r)=>a+r.m2r,0);
+    const m2p  = rows.reduce((a,r)=>a+r.m2p,0);
+    const dur  = rows.reduce((a,r)=>a+r.dur,0);
+    const sq   = rows[rows.length-1].sq;
+    return {
+      tot, pctComp: tot ? comp/tot*100 : 0,
+      eff: m2p ? Math.min(100, m2r/m2p*100) : 0,
+      dur, sq,
+    };
+  }
+
+  function renderKpis(rows, cmpRows){
+    const k = computeKpis(rows);
+    if (!k){
+      ['tot','comp','eff','dur','sq'].forEach(key => $(`kpi-${key}`).textContent = '—');
+      return;
+    }
+    $('kpi-tot').textContent  = k.tot.toLocaleString('es-CO');
+    $('kpi-comp').textContent = fmtPct(k.pctComp);
+    $('kpi-eff').textContent  = fmtPct(k.eff);
+    $('kpi-dur').textContent  = `${k.dur.toFixed(1)} h`;
+    $('kpi-sq').textContent   = fmtPct(k.sq);
+
+    const c = cmpRows ? computeKpis(cmpRows) : null;
+    const deltas = {
+      tot:  c ? k.tot - c.tot : null,
+      comp: c ? k.pctComp - c.pctComp : null,
+      eff:  c ? k.eff - c.eff : null,
+      dur:  c ? k.dur - c.dur : null,
+      sq:   c ? k.sq - c.sq : null,
+    };
+    Object.entries(deltas).forEach(([key, d]) => {
+      const el = $(`kpi-${key}-d`);
+      if (d === null || Number.isNaN(d)){ el.textContent = ''; el.className='delta'; return; }
+      const up = d >= 0;
+      el.textContent = `${up?'▲':'▼'} ${Math.abs(d).toFixed(1)} vs. comparación`;
+      el.className = `delta ${up?'up':'down'}`;
+    });
+  }
+
+  function statusBadge(st){
+    const map = {normal:['normal','● Normal'], low:['low','● Bajo'], critical:['critical','● Crítico']};
+    const [cls,label] = map[st] || ['normal','—'];
+    return `<span class="badge ${cls}"><span class="dot"></span>${label.replace('● ','')}</span>`;
+  }
+
+  let sortKey = 'fd', sortDir = -1;
+  function renderTable(rows){
+    const tbody = $('daily-tbody');
+    const empty = $('empty-state');
+    if (!rows.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    const sorted = [...rows].sort((a,b)=>{
+      const va=a[sortKey], vb=b[sortKey];
+      if (va<vb) return -1*sortDir; if (va>vb) return 1*sortDir; return 0;
+    });
+    tbody.innerHTML = sorted.map(r => `
+      <tr>
+        <td>${r.fd}</td><td>${r.wd}</td><td>${r.store||'—'}</td>
+        <td>${r.tot}</td><td>${r.comp}</td><td>${r.repl}</td><td>${r.man}</td>
+        <td>${r.m2r.toLocaleString('es-CO')}</td><td>${r.m2p.toLocaleString('es-CO')}</td>
+        <td>${statusBadge(r.st)} ${fmtPct(r.eff)}</td>
+        <td>${r.dur.toFixed(1)}</td><td>${fmtPct(r.sq)}</td>
+      </tr>`).join('');
+  }
+
+  document.querySelectorAll('#daily-table th[data-k]').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      sortDir = (sortKey === k) ? -sortDir : -1;
+      sortKey = k;
+      renderTable(currentRows());
+    });
+  });
+
+  // ── Hourly stacked bar chart (status categories) ──────────────────
+  function renderHourly(){
+    const svg = $('chart-hourly');
+    const W=640, H=260, padL=28, padB=22, padT=8, padR=6;
+    const plotW = W-padL-padR, plotH = H-padT-padB;
+    const n = 24;
+    const totals = HOURLY.comp.map((v,i)=>v+HOURLY.repl[i]+HOURLY.man[i]);
+    const max = Math.max(1, ...totals);
+    const bw = plotW/n;
+    let bars='', axis='';
+    for (let i=0;i<n;i++){
+      const x = padL + i*bw;
+      const c = HOURLY.comp[i], rp = HOURLY.repl[i], m = HOURLY.man[i];
+      let y = padT+plotH;
+      [[m,'var(--critical)'],[rp,'var(--warning)'],[c,'var(--good)']].forEach(([v,color])=>{
+        const h = v/max*plotH;
+        y -= h;
+        if (v>0) bars += `<rect x="${x+2}" y="${y}" width="${Math.max(1,bw-4)}" height="${h}" rx="1.5" fill="${color}" data-h="${i}" data-c="${c}" data-r="${rp}" data-m="${m}"></rect>`;
+      });
+      if (i%3===0) axis += `<text class="axis-label" x="${x+bw/2}" y="${H-6}" text-anchor="middle">${i}h</text>`;
+    }
+    axis += `<line x1="${padL}" y1="${padT+plotH}" x2="${W-padR}" y2="${padT+plotH}" stroke="var(--grid)" stroke-width="1"/>`;
+    svg.innerHTML = bars + axis;
+
+    const tt = $('tt-hourly'), wrap = $('hourly-wrap');
+    svg.querySelectorAll('rect').forEach(r=>{
+      r.addEventListener('mousemove', (e)=>{
+        const b = wrap.getBoundingClientRect();
+        tt.style.left = (e.clientX-b.left)+'px'; tt.style.top = (e.clientY-b.top)+'px';
+        tt.style.opacity=1;
+        tt.textContent = `${r.dataset.h}h · Normal ${r.dataset.c} · Reemp. ${r.dataset.r} · Manual ${r.dataset.m}`;
+      });
+      r.addEventListener('mouseleave', ()=> tt.style.opacity=0);
+    });
+  }
+
+  // ── Squeegee trend line chart ──────────────────────────────────────
+  function renderSqTrend(){
+    const svg = $('chart-sq');
+    const labels = SQ_TREND.labels||[], values = SQ_TREND.values||[];
+    const W=480, H=260, padL=32, padB=24, padT=10, padR=10;
+    const plotW=W-padL-padR, plotH=H-padT-padB;
+    if (!values.length){ svg.innerHTML = `<text class="axis-label" x="${W/2}" y="${H/2}" text-anchor="middle">Sin datos</text>`; return; }
+    const max = 100, min = 0;
+    const stepX = values.length>1 ? plotW/(values.length-1) : 0;
+    const pts = values.map((v,i)=>{
+      const x = padL + i*stepX;
+      const y = padT + plotH - ((v-min)/(max-min))*plotH;
+      return [x,y];
+    });
+    const path = pts.map((p,i)=> (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    let grid='';
+    [0,25,50,75,100].forEach(v=>{
+      const y = padT+plotH-((v-min)/(max-min))*plotH;
+      grid += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+      grid += `<text class="axis-label" x="${padL-4}" y="${y+3}" text-anchor="end">${v}</text>`;
+    });
+    const dots = pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--line)" data-i="${i}"></circle>`).join('');
+    svg.innerHTML = grid + `<path d="${path}" fill="none" stroke="var(--line)" stroke-width="2"/>` + dots;
+
+    const tt = $('tt-sq'), wrap = $('sq-wrap');
+    svg.querySelectorAll('circle').forEach(c=>{
+      c.addEventListener('mousemove', (e)=>{
+        const i = +c.dataset.i;
+        const b = wrap.getBoundingClientRect();
+        tt.style.left = (e.clientX-b.left)+'px'; tt.style.top = (e.clientY-b.top)+'px';
+        tt.style.opacity=1;
+        tt.textContent = `${labels[i]} · ${fmtPct(values[i])}`;
+      });
+      c.addEventListener('mouseleave', ()=> tt.style.opacity=0);
+    });
+  }
+
+  function renderMonthly(){
+    const grid = $('mes-grid');
+    if (!MONTHLY.length){ grid.innerHTML = '<div class="empty-state">Sin meses procesados aún.</div>'; return; }
+    grid.innerHTML = MONTHLY.map(m => `
+      <div class="mes-card">
+        <div class="mm">${m.mes}</div>
+        <div class="row"><span>Tareas</span><b>${m.tot}</b></div>
+        <div class="row"><span>Completadas</span><b>${fmtPct(m.pct_comp)}</b></div>
+        <div class="row"><span>Eficiencia m²</span><b>${fmtPct(m.eff)}</b></div>
+        <div class="row"><span>Squeegee</span><b>${fmtPct(m.sq_start)} → ${fmtPct(m.sq_end)}</b></div>
+      </div>`).join('');
+  }
+
+  function renderConsumables(){
+    if (!DATA.length) return;
+    const sq = DATA[DATA.length-1].sq;
+    const bar = $('cons-bar'), status = $('cons-status');
+    bar.style.width = `${Math.max(0,Math.min(100,sq))}%`;
+    if (sq<=15){ bar.style.background='var(--critical)'; status.className='status crit'; status.textContent='⛔ CRÍTICO'; }
+    else if (sq<=40){ bar.style.background='var(--warning)'; status.className='status low'; status.textContent='⚠ Bajo'; }
+    else { bar.style.background='var(--good)'; status.className='status ok'; status.textContent='✔ Normal'; }
+  }
+
+  // ── Filters ─────────────────────────────────────────────────────────
+  function currentRows(){
+    const from = $('fa-from').value, to = $('fa-to').value;
+    return DATA.filter(r => inRange(r.fd, from, to));
+  }
+
+  function applyFilters(){
+    const rows = currentRows();
+    renderTable(rows);
+    renderKpis(rows, null);
+    $('filter-note').textContent = rows.length ? `${rows.length} día(s) en el rango` : 'Sin días en el rango seleccionado';
+  }
+
+  function applyCompare(){
+    const rows = currentRows();
+    const cFrom = $('cb-from').value, cTo = $('cb-to').value;
+    const cmp = DATA.filter(r => inRange(r.fd, cFrom, cTo));
+    renderKpis(rows, cmp.length ? cmp : null);
+    $('filter-note').textContent = cmp.length
+      ? `Comparando con ${cmp.length} día(s) (${cFrom||'—'} → ${cTo||'—'})`
+      : 'Sin días en el rango de comparación';
+  }
+
+  $('btn-apply').addEventListener('click', applyFilters);
+  $('btn-compare').addEventListener('click', applyCompare);
+  $('btn-reset').addEventListener('click', () => {
+    $('fa-from').value=''; $('fa-to').value = DATA.length ? DATA[DATA.length-1].fd : '';
+    $('filter-note').textContent='';
+    renderTable(DATA); renderKpis(DATA, null);
+  });
+
+  // ── Initial render ───────────────────────────────────────────────
+  if (DATA.length && !$('fa-from').value) $('fa-from').value = DATA[0].fd;
+  if (DATA.length && !$('cb-from').value){
+    const n = Math.min(DATA.length, 7);
+    $('cb-from').value = DATA[Math.max(0, DATA.length-2*n)].fd;
+    $('cb-to').value   = DATA[Math.max(0, DATA.length-n-1)].fd;
+  }
+
+  renderKpis(DATA, null);
+  renderTable(DATA);
+  renderHourly();
+  renderSqTrend();
+  renderMonthly();
+  renderConsumables();
+})();
+</script>
+</body>
+</html>

@@ -9,9 +9,9 @@ por la API de **Gausium Cloud** (https://cloud.gausium.com).
    del robot (por API JSON o exportación Excel) y el estado de consumibles.
 2. `data_processor.py` normaliza y agrega esos datos en KPIs diarios/mensuales.
 3. `dashboard_updater.py` inyecta esos datos en `dashboard_robot_v11.html`
-   (el template del dashboard) y genera `dashboard_robot_latest.html`, un
-   archivo HTML autocontenido (sin dependencias externas) listo para abrir o
-   compartir.
+   (el template del dashboard) y genera `index.html`, un archivo HTML
+   autocontenido (sin dependencias externas) listo para abrir, compartir o
+   servir como sitio estático.
 4. `run_daily.py` orquesta todo el pipeline y mantiene un historial en
    `robot_history.json`.
 5. `.github/workflows/daily_dashboard.yml` corre este pipeline todos los días
@@ -55,15 +55,16 @@ python run_daily.py --from-file data.xlsx  # Desde un Excel/CSV local (sin API)
 ```
 
 Cada corrida actualiza `robot_history.json` (historial acumulado) y regenera
-`dashboard_robot_latest.html` con los KPIs, el detalle diario, el resumen
-mensual, la distribución horaria de tareas y la tendencia de consumibles
-(Squeegee).
+`index.html` con los KPIs, el detalle diario, el resumen mensual, la
+distribución horaria de tareas y la tendencia de consumibles (Squeegee).
 
 ## Automatización (GitHub Actions)
 
 El workflow `.github/workflows/daily_dashboard.yml` corre cada día a las
-6:00 a.m. (hora Colombia) y hace commit del dashboard/historial actualizados.
-Configura estos secretos en el repositorio:
+6:00 a.m. (hora Colombia) y hace commit del dashboard/historial actualizados
+(`index.html` y `robot_history.json` **sí se versionan**: así persiste el
+historial entre corridas y el dashboard queda servible directamente desde
+el repo). Configura estos secretos en el repositorio:
 
 - `GAUSIUM_USERNAME`, `GAUSIUM_PASSWORD`, `ROBOT_SERIAL`
 - `GOOGLE_DRIVE_ID`, `NOTIFY_EMAIL` (opcionales)
@@ -71,10 +72,26 @@ Configura estos secretos en el repositorio:
 ## Dashboard
 
 `dashboard_robot_v11.html` es la plantilla base (con datos vacíos) y sirve
-como punto de partida versionado. `dashboard_robot_latest.html` es el
-resultado generado en cada corrida y **no se versiona** (ver `.gitignore`);
-se sube como artefacto de la corrida de GitHub Actions y opcionalmente a
-Google Drive o por correo.
+como punto de partida versionado — nunca se sobreescribe. `index.html` es el
+resultado generado en cada corrida (arranca como copia vacía de la
+plantilla) y sí se versiona, para que Netlify/GitHub Pages lo sirvan tal
+cual en la raíz del sitio.
+
+## Publicar en Netlify
+
+El repo ya incluye `netlify.toml` (sin build command, publica la raíz), así
+que conectar el sitio es directo:
+
+1. En Netlify: **Add new site → Import an existing project → GitHub** y
+   selecciona este repositorio (rama `main` o la que prefieras mantener
+   desplegada).
+2. Build command: vacío. Publish directory: `.` (ya viene en `netlify.toml`,
+   no hace falta tocarlo).
+3. Netlify servirá `index.html` en la raíz automáticamente. Al principio
+   mostrará el estado vacío ("Sin datos aún") hasta que el workflow de
+   GitHub Actions corra por primera vez con las credenciales reales de
+   Gausium y haga commit de un `index.html` con datos — Netlify redepliega
+   solo con cada push.
 
 El dashboard incluye:
 - KPIs (tareas totales, % completadas, eficiencia m², horas de operación,

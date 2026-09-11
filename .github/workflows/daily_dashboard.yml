@@ -35,7 +35,7 @@ jobs:
           GAUSIUM_PASSWORD:   ${{ secrets.GAUSIUM_PASSWORD }}
           ROBOT_SERIAL:       ${{ secrets.ROBOT_SERIAL }}
           DASHBOARD_TEMPLATE: dashboard_robot_v11.html
-          OUTPUT_PATH:        dashboard_robot_latest.html
+          OUTPUT_PATH:        index.html
           GOOGLE_DRIVE_ID:    ${{ secrets.GOOGLE_DRIVE_ID }}
           NOTIFY_EMAIL:       ${{ secrets.NOTIFY_EMAIL }}
         run: |
@@ -46,13 +46,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-${{ github.run_number }}
-          path: dashboard_robot_latest.html
+          path: index.html
           retention-days: 30
 
       - name: Commit historial actualizado
         run: |
           git config user.name  "Robot Dashboard Bot"
           git config user.email "bot@farmatodo.com"
-          git add robot_history.json dashboard_robot_latest.html
+          git add robot_history.json index.html
           git diff --staged --quiet || git commit -m "📊 Dashboard actualizado $(date '+%Y-%m-%d')"
           git push

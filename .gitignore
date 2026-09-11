@@ -2,9 +2,9 @@
 config.yaml
 service_account.json
 
-# Datos generados por el pipeline
-robot_history.json
-dashboard_robot_latest.html
+# robot_history.json e index.html SÍ se versionan: el workflow diario los
+# commitea para persistir el historial entre corridas y para que Netlify/
+# GitHub Pages sirvan el dashboard actualizado directamente desde el repo.
 _tmp_tasks_*.xlsx
 robot_dashboard.log
 
