@@ -3,9 +3,9 @@
 gausium_client.py — Cliente API para Gausium Cloud
 ===================================================
 Autenticación, descarga de tareas y exportación de reportes.
-API Base: https://cloud.gausium.com
+API Base: https://cloud.gs-robot.com
 
-Documentación Gausium: https://developer.gausium.com
+Documentación Gausium: https://developer.gs-robot.com
 """
 
 import hashlib, logging, time, requests
@@ -17,7 +17,7 @@ log = logging.getLogger("gausium_client")
 class GausiumClient:
     """Cliente para la API REST de Gausium Cloud."""
 
-    BASE = "https://cloud.gausium.com"
+    BASE = "https://cloud.gs-robot.com"
 
     # Endpoints conocidos (verificar con tu representante Gausium si cambian)
     ENDPOINTS = {

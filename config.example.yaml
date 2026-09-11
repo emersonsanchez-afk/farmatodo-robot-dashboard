@@ -7,7 +7,7 @@
 # Usar variables de entorno en producción (GAUSIUM_USERNAME, GAUSIUM_PASSWORD)
 # para no exponer contraseñas en texto plano.
 username: ""          # tu_email@farmatodo.com
-password: ""          # contraseña del portal cloud.gausium.com
+password: ""          # contraseña del portal cloud.gs-robot.com
 
 # ── Robot ─────────────────────────────────────────────────────────
 robot_serial: "GS438-6260-1CR-7000"
