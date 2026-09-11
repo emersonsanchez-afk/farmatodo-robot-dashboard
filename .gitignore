@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Archivos generados en tiempo de ejecución
+robot_dashboard.log
+_tmp_tasks_*.xlsx
+
+# Credenciales / secretos locales
+service_account.json
+.env
