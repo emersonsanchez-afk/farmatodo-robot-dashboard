@@ -1,7 +1,7 @@
 # Farmatodo Robot Dashboard — Integración Gausium API
 
 Dashboard de operación del robot autónomo de limpieza, alimentado directamente
-por la API de **Gausium Cloud** (https://cloud.gausium.com).
+por la API de **Gausium Cloud** (https://cloud.gs-robot.com).
 
 ## ¿Qué hace?
 
@@ -23,7 +23,7 @@ por la API de **Gausium Cloud** (https://cloud.gausium.com).
    ```bash
    cp config.example.yaml config.yaml
    ```
-2. Completa tus credenciales de `cloud.gausium.com` y el número de serie del
+2. Completa tus credenciales de `cloud.gs-robot.com` y el número de serie del
    robot en `config.yaml` **o**, preferiblemente, usa variables de entorno
    (no se versionan):
 
