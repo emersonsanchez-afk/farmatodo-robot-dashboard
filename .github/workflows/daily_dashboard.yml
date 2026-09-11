@@ -31,8 +31,9 @@ jobs:
 
       - name: Actualizar dashboard
         env:
-          GAUSIUM_USERNAME:   ${{ secrets.GAUSIUM_USERNAME }}
-          GAUSIUM_PASSWORD:   ${{ secrets.GAUSIUM_PASSWORD }}
+          GAUSIUM_CLIENT_ID:       ${{ secrets.GAUSIUM_CLIENT_ID }}
+          GAUSIUM_CLIENT_SECRET:   ${{ secrets.GAUSIUM_CLIENT_SECRET }}
+          GAUSIUM_OPEN_ACCESS_KEY: ${{ secrets.GAUSIUM_OPEN_ACCESS_KEY }}
           ROBOT_SERIAL:       ${{ secrets.ROBOT_SERIAL }}
           DASHBOARD_TEMPLATE: dashboard_robot_v11.html
           OUTPUT_PATH:        index.html

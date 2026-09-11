@@ -12,8 +12,9 @@ USO:
   python run_daily.py --from-file data.xlsx  # Desde un Excel descargado manualmente
 
 VARIABLES DE ENTORNO (o en config.yaml):
-  GAUSIUM_USERNAME   email o usuario de Gausium Cloud
-  GAUSIUM_PASSWORD   contraseña (en texto plano; el script la hashea)
+  GAUSIUM_CLIENT_ID        Client ID del Gausium Developer Portal
+  GAUSIUM_CLIENT_SECRET    Client Secret del Gausium Developer Portal
+  GAUSIUM_OPEN_ACCESS_KEY  Open Access Key del Gausium Developer Portal
   ROBOT_SERIAL       número de serie del robot
   DASHBOARD_TEMPLATE ruta al HTML template del dashboard
   OUTPUT_PATH        ruta de salida del dashboard actualizado
@@ -62,8 +63,9 @@ def load_config(config_file: str = 'config.yaml') -> dict:
             cfg = yaml.safe_load(f) or {}
 
     # Variables de entorno tienen prioridad sobre el YAML
-    cfg['username']     = os.getenv('GAUSIUM_USERNAME',  cfg.get('username', ''))
-    cfg['password']     = os.getenv('GAUSIUM_PASSWORD',  cfg.get('password', ''))
+    cfg['client_id']        = os.getenv('GAUSIUM_CLIENT_ID',        cfg.get('client_id', ''))
+    cfg['client_secret']    = os.getenv('GAUSIUM_CLIENT_SECRET',    cfg.get('client_secret', ''))
+    cfg['open_access_key']  = os.getenv('GAUSIUM_OPEN_ACCESS_KEY',  cfg.get('open_access_key', ''))
     cfg['robot_serial'] = os.getenv('ROBOT_SERIAL',      cfg.get('robot_serial', 'GS438-6260-1CR-7000'))
     cfg['template']     = os.getenv('DASHBOARD_TEMPLATE', cfg.get('template', 'dashboard_robot_v11.html'))
     cfg['output']       = os.getenv('OUTPUT_PATH',        cfg.get('output', 'index.html'))
@@ -210,31 +212,20 @@ def run(cfg: dict, args: argparse.Namespace):
         else:
             new_df = pd.read_excel(p)
 
-    elif cfg['username'] and cfg['password']:
-        # Modo online: descargar de la API
-        client = GausiumClient(cfg['username'], cfg['password'])
+    elif cfg['client_id'] and cfg['client_secret'] and cfg['open_access_key']:
+        # Modo online: descargar del Gausium Open API
+        client = GausiumClient(cfg['client_id'], cfg['client_secret'], cfg['open_access_key'])
         if not client.login():
             log.error("❌ No se pudo autenticar. Verifica tus credenciales en config.yaml")
             sys.exit(1)
 
-        # Intentar exportación Excel directa (más completa)
-        tmp_xlsx = f"_tmp_tasks_{start}_{end}.xlsx"
-        excel_path = client.export_excel(cfg['robot_serial'], start, end, tmp_xlsx)
+        tasks = client.get_tasks(cfg['robot_serial'], start, end)
+        new_df = pd.DataFrame(tasks) if tasks else pd.DataFrame()
 
-        if excel_path:
-            new_df = pd.read_excel(excel_path)
-            Path(excel_path).unlink(missing_ok=True)  # limpiar temporal
-        else:
-            # Fallback: API de tareas JSON
-            log.info("⚠ Excel no disponible, usando API de tareas JSON...")
-            tasks = client.get_tasks(cfg['robot_serial'], start, end)
-            new_df = pd.DataFrame(tasks) if tasks else pd.DataFrame()
-
-        # Consumibles (si disponible)
-        consumables = client.get_consumables(cfg['robot_serial'])
-        if consumables:
-            log.info(f"🔧 Consumibles: Squeegee={consumables.get('squeegeePercent','—')}% "
-                     f"Brush={consumables.get('brushPercent','—')}%")
+        if tasks:
+            last = tasks[-1]
+            log.info(f"🔧 Consumibles: Squeegee={last.get('sq','—')}% "
+                     f"Brush={last.get('brush','—')}%")
 
     else:
         log.error("❌ Sin credenciales API ni archivo. Usa --from-file o configura config.yaml")

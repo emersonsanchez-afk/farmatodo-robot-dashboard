@@ -1,12 +1,14 @@
 # Farmatodo Robot Dashboard — Integración Gausium API
 
 Dashboard de operación del robot autónomo de limpieza, alimentado directamente
-por la API de **Gausium Cloud** (https://cloud.gs-robot.com).
+por el **Gausium Open API** (https://openapi.gs-robot.com, documentado en
+https://developer.gs-robot.com).
 
 ## ¿Qué hace?
 
-1. `gausium_client.py` se autentica contra Gausium Cloud y descarga las tareas
-   del robot (por API JSON o exportación Excel) y el estado de consumibles.
+1. `gausium_client.py` se autentica vía OAuth (client credentials) contra el
+   Gausium Open API y descarga los reportes de tareas del robot (incluyen el
+   estado de consumibles como Squeegee/brush/filter).
 2. `data_processor.py` normaliza y agrega esos datos en KPIs diarios/mensuales.
 3. `dashboard_updater.py` inyecta esos datos en `dashboard_robot_v11.html`
    (el template del dashboard) y genera `index.html`, un archivo HTML
@@ -23,19 +25,23 @@ por la API de **Gausium Cloud** (https://cloud.gs-robot.com).
    ```bash
    cp config.example.yaml config.yaml
    ```
-2. Completa tus credenciales de `cloud.gs-robot.com` y el número de serie del
-   robot en `config.yaml` **o**, preferiblemente, usa variables de entorno
-   (no se versionan):
+2. Obtén tu **Client ID**, **Client Secret** y **Open Access Key** registrando
+   una app en el Developer Portal: https://developer.gs-robot.com (necesitas
+   una cuenta con acceso de administrador/integrador en Gausium Cloud; si no
+   la tienes, pídesela a tu representante de Gausium). Completa esos valores
+   y el número de serie del robot en `config.yaml` **o**, preferiblemente,
+   usa variables de entorno (no se versionan):
 
-   | Variable             | Descripción                                  |
-   |----------------------|-----------------------------------------------|
-   | `GAUSIUM_USERNAME`   | Email/usuario del portal Gausium Cloud       |
-   | `GAUSIUM_PASSWORD`   | Contraseña (se hashea a MD5 antes de enviarla) |
-   | `ROBOT_SERIAL`       | Número de serie del robot                     |
-   | `DASHBOARD_TEMPLATE` | Template HTML (`dashboard_robot_v11.html`)   |
-   | `OUTPUT_PATH`        | Salida del dashboard actualizado              |
-   | `GOOGLE_DRIVE_ID`    | (opcional) carpeta de Drive para subir el HTML |
-   | `NOTIFY_EMAIL`       | (opcional) destinatario del resumen diario    |
+   | Variable                  | Descripción                                  |
+   |---------------------------|-----------------------------------------------|
+   | `GAUSIUM_CLIENT_ID`       | Client ID del Developer Portal                |
+   | `GAUSIUM_CLIENT_SECRET`   | Client Secret del Developer Portal            |
+   | `GAUSIUM_OPEN_ACCESS_KEY` | Open Access Key del Developer Portal          |
+   | `ROBOT_SERIAL`            | Número de serie del robot                     |
+   | `DASHBOARD_TEMPLATE`      | Template HTML (`dashboard_robot_v11.html`)   |
+   | `OUTPUT_PATH`             | Salida del dashboard actualizado              |
+   | `GOOGLE_DRIVE_ID`         | (opcional) carpeta de Drive para subir el HTML |
+   | `NOTIFY_EMAIL`            | (opcional) destinatario del resumen diario    |
 
    `config.yaml` está en `.gitignore` para evitar subir credenciales por error.
 
@@ -66,7 +72,7 @@ El workflow `.github/workflows/daily_dashboard.yml` corre cada día a las
 historial entre corridas y el dashboard queda servible directamente desde
 el repo). Configura estos secretos en el repositorio:
 
-- `GAUSIUM_USERNAME`, `GAUSIUM_PASSWORD`, `ROBOT_SERIAL`
+- `GAUSIUM_CLIENT_ID`, `GAUSIUM_CLIENT_SECRET`, `GAUSIUM_OPEN_ACCESS_KEY`, `ROBOT_SERIAL`
 - `GOOGLE_DRIVE_ID`, `NOTIFY_EMAIL` (opcionales)
 
 ## Dashboard
