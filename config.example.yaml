@@ -3,11 +3,15 @@
 #  Renombrar este archivo a config.yaml y completar los valores
 # ══════════════════════════════════════════════════════════════════
 
-# ── Credenciales Gausium Cloud ────────────────────────────────────
-# Usar variables de entorno en producción (GAUSIUM_USERNAME, GAUSIUM_PASSWORD)
-# para no exponer contraseñas en texto plano.
-username: ""          # tu_email@farmatodo.com
-password: ""          # contraseña del portal cloud.gs-robot.com
+# ── Credenciales Gausium Open API ─────────────────────────────────
+# Se obtienen registrando una app en el Developer Portal:
+# https://developer.gs-robot.com
+# Usar variables de entorno en producción (GAUSIUM_CLIENT_ID,
+# GAUSIUM_CLIENT_SECRET, GAUSIUM_OPEN_ACCESS_KEY) para no exponerlas
+# en texto plano.
+client_id: ""          # Client ID del Developer Portal
+client_secret: ""      # Client Secret del Developer Portal
+open_access_key: ""    # Open Access Key del Developer Portal
 
 # ── Robot ─────────────────────────────────────────────────────────
 robot_serial: "GS438-6260-1CR-7000"
